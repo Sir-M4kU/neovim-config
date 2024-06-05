@@ -94,7 +94,7 @@ return {
     vim.list_extend(ensure_installed, {
       "stylua"
     })
-    require("mason-tool-installer").setup({ ensure_installed })
+    require("mason-tool-installer").setup({ ensure_installed, auto_update = true })
     require("mason-lspconfig").setup({
       automatic_installation = true,
       handlers = {
