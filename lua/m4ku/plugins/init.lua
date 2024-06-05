@@ -12,10 +12,10 @@ return {
     }
   },
   {
-    "folke/tokyonight.nvim",
+    "neanias/everforest-nvim",
     priority = 1000,
     init = function()
-      vim.cmd.colorscheme("tokyonight-night")
+      vim.cmd.colorscheme("everforest")
 
       vim.cmd.hi("Comment gui=none")
     end
@@ -27,7 +27,7 @@ return {
       require("mini.surround").setup()
 
       local statusline = require("mini.statusline")
-      statusline.setup({ use_icons = vim.g.have_nerd_font })	
+      statusline.setup({ use_icons = vim.g.have_nerd_font })
       statusline.section_location = function()
         return "%21:%-2v"
       end
