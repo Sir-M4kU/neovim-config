@@ -1,21 +1,18 @@
-local map = function(mode, keys, command, desc)
-  opts = opts or {}
-  opts.buffer = bufnr
-  vim.keymap.set(mode, keys, command, { desc = "Git: " .. desc })
-end
-
 return {
   "lewis6991/gitsigns.nvim",
   opts = {
-    signs = {
-      add = { text = "+" },
-      change = { text = "~" },
-      delete = { text = "_" },
-      topdelete = { text = "‾" },
-      changedelete = { text = "~" }
-    },
+    -- signs = {
+    --   add = { text = "+" },
+    --   change = { text = "~" },
+    --   delete = { text = "_" },
+    --   topdelete = { text = "‾" },
+    --   changedelete = { text = "~" }
+    -- },
     on_attach = function(bufnr)
       local gitsigns = require("gitsigns")
+      local map = function(mode, keys, command, desc)
+        vim.keymap.set(mode, keys, command, { desc = "Git: " .. desc, buffer = bufnr })
+      end
 
       map("n", "]c", function()
         if vim.wo.diff then
