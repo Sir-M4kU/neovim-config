@@ -8,68 +8,14 @@ return {
     "rcarriga/nvim-dap-ui",
     "nvim-neotest/nvim-nio",
     "williamboman/mason.nvim",
-    "jay-babu/mason-nvim-dap.nvim"
+    {
+      "Joakker/lua-json5",
+      build = "./install.sh"
+    }
   },
   config = function()
-    local mason_registry = require("mason-registry")
-    mason_registry.refresh()
-    local js_debug = mason_registry.get_package("js-debug-adapter")
     local dap = require("dap")
     local dapui = require("dapui")
-    local js_debug_path = js_debug:get_install_path() .. "/js-debug/src/dapDebugServer.js"
-
-    require("mason-nvim-dap").setup({
-      ensure_installed = { "js-debug-adapter", "codelldb" },
-      automatic_installation = true,
-      handlers = {}
-    })
-
-    if not dap.adapters["pwa-node"] then
-      dap.adapters["pwa-node"] = {
-        type = "server",
-        host = "localhost",
-        port = "${port}",
-        executable = {
-          command = "node",
-          args = { js_debug_path, "-p", "${port}" }
-        }
-      }
-    end
-    if not dap.adapters["node"] then
-      dap.adapters["node"] = function(cb, config)
-        if config.type == "node" then
-          config.type = "pwa-node"
-        end
-
-        local native_adapter = dap.adapters["pwa-node"]
-        if type(native_adapter) == "function" then
-          native_adapter(cb, config)
-        else
-          cb(native_adapter)
-        end
-      end
-    end
-
-    for _, lang in ipairs({ "typescript", "javascript", "typescriptreact", "javascriptreact" }) do
-      if not dap.configurations[lang] then
-        dap.configurations[lang] = {
-          {
-            type = "pwa-node",
-            request = "launch",
-            name = "Launch file",
-            program = "${file}",
-            cwd = "${workspaceFolder}"
-          },
-          {
-            type = "pwa-node",
-            request = "attach",
-            name = "Attach",
-            processId = require("dap.utils").pick_process,
-            cwd = "${workspaceFolder}"
-          }
-        }
-      end
-    end
 
     dapui.setup()
 
