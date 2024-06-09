@@ -66,8 +66,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup(
 	{
-		spec = "m4ku.plugins",
-		cond = (function() return not vim.g.vscode end)
+		spec = "m4ku.plugins"
 	},
 	{
 		ui = {
