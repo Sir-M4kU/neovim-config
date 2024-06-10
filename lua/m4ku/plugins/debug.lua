@@ -5,21 +5,43 @@ end
 return {
   "mfussenegger/nvim-dap",
   dependencies = {
-    "rcarriga/nvim-dap-ui",
-    "nvim-neotest/nvim-nio",
-    "williamboman/mason.nvim",
     {
-      "Joakker/lua-json5",
-      build = "./install.sh"
-    }
+      "rcarriga/nvim-dap-ui",
+      dependencies = { "nvim-neotest/nvim-nio" }
+    },
+    {
+      "mxsdev/nvim-dap-vscode-js",
+      dependencies = {
+        "microsoft/vscode-js-debug",
+        build = "npm install --legacy-peer-deps && npx gulp vsDebugServerBundle && mv dist out"
+      },
+      opts = {
+        debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
+        adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "node-terminal", "pwa-extension-host" }
+      }
+    },
+    "williamboman/mason.nvim",
+    "theHamsta/nvim-dap-virtual-text"
   },
   config = function()
     local dap = require("dap")
     local dapui = require("dapui")
+    local debug_type_preferred = { ["node"] = "pwa-node" }
+
+    if not dap.adapters["node"] then
+      dap.adapters["node"] = function(cb, cfg)
+        cfg.type = debug_type_preferred[cfg.type] or cfg.type
+        local native_adapter = dap.adapters["pwa-node"]
+        if type(native_adapter) == "function" then
+          native_adapter(cb, cfg)
+        else
+          cb(native_adapter)
+        end
+      end
+    end
 
     dapui.setup()
 
-    map("<leader>td", dapui.toggle, "Toggle UI")
     map("<F5>", dap.continue, "Start/Continue")
     map("<F1>", dap.step_into, "Step into")
     map("<F2>", dap.step_over, "Step over")
@@ -32,7 +54,7 @@ return {
       end,
       "Set Breakpoint"
     )
-
+    map("<leader>de", dapui.eval, "Evaluate expression")
 
     map("<F7>", dapui.toggle, "See last session result")
 
