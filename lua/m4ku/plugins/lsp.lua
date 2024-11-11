@@ -8,6 +8,11 @@ return {
     { "folke/neodev.nvim",       opts = {} }
   },
   config = function()
+    local lspconfig = require("lspconfig")
+    local mason = require("mason")
+    local mason_tool_installer = require("mason-tool-installer")
+    local mason_lspconfig = require("mason-lspconfig")
+
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("m4ku-lsp-attach", { clear = true }),
       callback = function(event)
@@ -69,6 +74,8 @@ return {
       end
     })
 
+    local cwd = vim.fn.getcwd()
+    local is_deno = (vim.loop.fs_stat(cwd .. "/deno.json") ~= nil) or (vim.loop.fs_stat(cwd .. "/deno.lock") ~= nil)
     local capabilities = vim.lsp.protocol.make_client_capabilities()
     capabilities = vim.tbl_deep_extend(
       "force",
@@ -85,17 +92,32 @@ return {
             }
           }
         }
+      },
+      tsserver = {
+        autostart = not is_deno,
+        single_file_support = false
+      },
+      denols = {
+        autostart = is_deno
+      },
+      tailwindcss = {
+        root_dir = lspconfig.util.root_pattern(
+          "tailwind.config.js",
+          "tailwind.config.ts",
+          "tailwind.config.mjs",
+          "tailwind.config.cjs"
+        )
       }
     }
 
-    require("mason").setup()
+    mason.setup()
 
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
       "stylua"
     })
-    require("mason-tool-installer").setup({ ensure_installed, auto_update = true })
-    require("mason-lspconfig").setup({
+    mason_tool_installer.setup({ ensure_installed, auto_update = true })
+    mason_lspconfig.setup({
       automatic_installation = true,
       handlers = {
         function(server_name)
@@ -106,7 +128,7 @@ return {
             capabilities,
             server.capabilities or {}
           )
-          require("lspconfig")[server_name].setup(server)
+          lspconfig[server_name].setup(server)
         end
       }
     })
